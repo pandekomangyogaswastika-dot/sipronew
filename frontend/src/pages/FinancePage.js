@@ -7,6 +7,7 @@ import CashflowPanel from "@/components/finance/CashflowPanel";
 import ArPanel from "@/components/finance/ArPanel";
 import DepositPanel from "@/components/finance/DepositPanel";
 import CollectionsPanel from "@/components/finance/CollectionsPanel";
+import LateFeeAutoPanel from "@/components/finance/LateFeeAutoPanel";
 import ApPanel from "@/components/finance/ApPanel";
 import CommissionsPanel from "@/components/finance/CommissionsPanel";
 import ReportsPanel from "@/components/finance/ReportsPanel";
@@ -82,7 +83,12 @@ export default function FinancePage() {
         <TabsContent value="cashflow" className="mt-4"><CashflowPanel /></TabsContent>
         <TabsContent value="ar" className="mt-4"><ArPanel /></TabsContent>
         <TabsContent value="deposits" className="mt-4"><DepositPanel /></TabsContent>
-        <TabsContent value="collections" className="mt-4"><CollectionsPanel /></TabsContent>
+        <TabsContent value="collections" className="mt-4">
+          <div className="space-y-6">
+            <CollectionsPanel />
+            <LateFeeAutoPanel />
+          </div>
+        </TabsContent>
         <TabsContent value="waivers" className="mt-4"><LateFeeWaiverReport /></TabsContent>
         <TabsContent value="ap" className="mt-4"><ApPanel /></TabsContent>
         <TabsContent value="commissions" className="mt-4"><CommissionsPanel /></TabsContent>

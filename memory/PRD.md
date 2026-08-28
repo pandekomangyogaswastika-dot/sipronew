@@ -5,7 +5,7 @@ keuangan/GL, konstruksi berbukti, portal pembeli, dan dokumen PDF ber-kop.
 Bahasa produk & komunikasi: **Indonesia**.
 
 ## Aturan kerja yang tidak boleh dilanggar
-- `bash scripts/run_all_gates.sh` adalah nyawa proyek. Semua gate harus PASS (sekarang **58 gate**).
+- `bash scripts/run_all_gates.sh` adalah nyawa proyek. Semua gate harus PASS (sekarang **59 gate**).
 - Batas ukuran berkas: Python < 800 baris, JS < 500 baris (`validate_compliance.py`).
 - Form: tidak boleh `<Input>` bebas untuk nilai enum/relasi (`audit_forms_deep.py`); setiap
   `<Input>` wajib punya label/placeholder/aria-label.
@@ -13,6 +13,24 @@ Bahasa produk & komunikasi: **Indonesia**.
 - Kredensial uji: `/app/memory/test_credentials.md` (sandi demo `Sipro#2026`).
 
 ## Riwayat implementasi (terbaru di atas)
+### 28 Agu 2026 (lanjutan) — Fase 68: denda terjadwal + pengingat tunggakan pra-SP (gate 59)
+- **Denda otomatis terjadwal** (`late_fee_auto.py` + `scheduler_p68.py`, cron 09:30 WIB):
+  opsi per organisasi `payment.late.auto_apply` (bawaan MATI — keputusan bisnis) + dua rem
+  `payment.late.auto_min_days` & `payment.late.auto_min_amount`. Tidak ada mesin kedua:
+  yang menagihkan tetap `late_fee_engine.apply` (berjurnal, idempoten per termin/bulan).
+  Panel di Keuangan → Penagihan: status, aturan, pratinjau (siap vs ditahan + sebab),
+  riwayat putaran, "Jalankan sekarang" (`late_fee:create`).
+  Endpoint: `GET/POST /api/finance/late-fee-auto[/run]`.
+- **Pengingat tunggakan pra-SP** (`wa_reminder_engine` jenis baru `arrears_warning`):
+  pesan WA disiapkan otomatis begitu tunggakan MELEWATI TOLERANSI kontrak (hitungan bulan
+  = mesin SP/arrears yang sama), menyebut keadaan SP ("SEBELUM SP1"). Nominal & aturan
+  bisa disetel: `reminder.arrears_enabled/min_amount/min_months/every_days/template_arrears`.
+  Tiap kandidat membawa tautan `wa.me` siap kirim (tombol "Kirim manual" di panel
+  pengingat); kirim otomatis tetap jujur `simulasi` tanpa kredensial WhatsApp.
+- **Bug laten ditutup:** `scheduler_p59` diimpor tetapi tidak pernah `register()` —
+  tugas peninjauan tunggakan harian tidak pernah terjadwal. Kini terdaftar.
+- Gate baru `scripts/verify_p68.py` (gate 59, 39 pemeriksaan) HIJAU.
+
 ### 28 Agu 2026 — Fase 67: kedalaman & konsistensi tampilan / anti-flat (gate 58) + pemulihan lingkungan
 - Lingkungan dipulihkan dari repo `akahdbeben/sipro` di container baru: `backend/.env`
   dibuat ulang (`JWT_SECRET`, `DEFAULT_ORG_ID=org-sipro`, `PORTAL_MASTER_OTP=000000` —

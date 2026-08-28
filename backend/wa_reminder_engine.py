@@ -40,16 +40,19 @@ from notifications import send_whatsapp, whatsapp_configured
 logger = logging.getLogger("sipro.reminder")
 
 COLL = "wa_reminders"
-KINDS = ("warranty_expiring", "installment_due", "installment_overdue")
+KINDS = ("warranty_expiring", "installment_due", "installment_overdue", "arrears_warning")
 # Template bawaan per jenis. Sengaja memakai template yang SUDAH disetujui sejak Fase 29b
 # supaya pengingat tidak menunggu approval baru; bisa diganti dari Pusat Konfigurasi.
 TEMPLATE_KEYS = {
     "warranty_expiring": "reminder.template_warranty",
     "installment_due": "reminder.template_installment",
     "installment_overdue": "reminder.template_overdue",
+    "arrears_warning": "reminder.template_arrears",
 }
 SETTING_KEYS = ("reminder.enabled", "reminder.warranty_days",
                 "reminder.installment_days_before", "reminder.overdue_every_days",
+                "reminder.arrears_enabled", "reminder.arrears_min_amount",
+                "reminder.arrears_min_months", "reminder.arrears_every_days",
                 *TEMPLATE_KEYS.values())
 
 
@@ -73,6 +76,10 @@ async def config(org: str = ORG_ID) -> dict:
         "warranty_days": int(vals.get("reminder.warranty_days") or 30),
         "installment_days_before": int(vals.get("reminder.installment_days_before") or 3),
         "overdue_every_days": int(vals.get("reminder.overdue_every_days") or 7),
+        "arrears_enabled": bool(vals.get("reminder.arrears_enabled", True)),
+        "arrears_min_amount": int(vals.get("reminder.arrears_min_amount") or 0),
+        "arrears_min_months": int(vals.get("reminder.arrears_min_months") or 1),
+        "arrears_every_days": int(vals.get("reminder.arrears_every_days") or 7),
         "templates": {k: vals.get(key) for k, key in TEMPLATE_KEYS.items()},
         "mode": "nyata" if whatsapp_configured() else "simulasi",
         "mode_detail": ("Kredensial WhatsApp Cloud API terpasang — pesan benar-benar dikirim."
@@ -226,6 +233,50 @@ async def candidates(org: str = ORG_ID) -> list:
                                          f"{item.get('item_id') or item.get('label')}:"
                                          f"{_bucket_week(today)}"})
 
+    # ---------- 4. Tunggakan lewat toleransi — pra-Surat Peringatan (Fase 68) ----------
+    # Pembeli tidak boleh baru tahu ada masalah saat SP1 datang. Bulan tunggakan dihitung
+    # mesin yang SAMA dengan SP & kandidat pembatalan (`late_fee_engine` + `arrears_engine`);
+    # nominal minimum, bulan minimum, dan jeda ulang disetel dari Pusat Konfigurasi.
+    if cfg["arrears_enabled"]:
+        import arrears_engine as arr
+        import late_fee_engine as lf
+        bucket = today.toordinal() // max(1, cfg["arrears_every_days"])
+        for inv in invs:
+            if inv.get("status") not in ("unpaid", "partial") or not inv.get("deal_id"):
+                continue
+            hitung = await lf.assess(org, inv["deal_id"])
+            a = arr.months_in_arrears(hitung.get("rows") or [])
+            if a["months"] < cfg["arrears_min_months"] \
+                    or a["overdue_amount"] < cfg["arrears_min_amount"]:
+                continue
+            buyer = await _buyer_of_invoice(org, inv)
+            sudah_sp = await db.warning_letters.count_documents(
+                {"org_id": org, "deal_id": inv["deal_id"]})
+            tertua = min((str(t.get("due_date"))[:10] for t in a["terms"]
+                          if t.get("due_date")), default=None)
+            out.append({
+                "kind": "arrears_warning",
+                "kind_label": ref.label_of("reminder_kind", "arrears_warning"),
+                "entity_type": "ar_invoice", "entity_id": inv["id"],
+                "unit_id": inv.get("unit_id"), "unit_code": inv.get("unit_code"),
+                **_recipient(buyer), "amount": a["overdue_amount"],
+                "due_date": tertua, "days_left": -a["max_days_late"],
+                "reason": (f"Tunggakan {a['months']} bulan LEWAT TOLERANSI "
+                           f"({_rp(a['overdue_amount'])}, terlama {a['max_days_late']} "
+                           f"hari) pada unit {inv.get('unit_code') or '-'}"
+                           + (f"; SP{sudah_sp} sudah pernah terbit — pengingat ini "
+                              f"mendahului tingkat berikutnya."
+                              if sudah_sp else
+                              "; belum ada Surat Peringatan — pengingat ini datang "
+                              "SEBELUM SP1.")),
+                "dedup_key": f"arrears_warning:{inv['deal_id']}:{bucket}",
+                "vars": {"nama": buyer.get("name") or "Bapak/Ibu",
+                         "unit": inv.get("unit_code") or "-",
+                         "nominal": _rp(a["overdue_amount"]),
+                         "bulan": str(a["months"]),
+                         "terlama": str(a["max_days_late"])},
+            })
+
     # Sebab yang MENGHALANGI pengiriman ditulis apa adanya — kandidat tidak disembunyikan,
     # supaya "kenapa pembeli ini tidak pernah diingatkan" bisa dijawab dari layar.
     sudah = set()
@@ -234,7 +285,11 @@ async def candidates(org: str = ORG_ID) -> list:
             {"org_id": org, "dedup_key": {"$in": [c["dedup_key"] for c in out]}},
             {"_id": 0, "dedup_key": 1}).to_list(5000)
         sudah = {r["dedup_key"] for r in rows}
+    from doc_share import wa_url
     for c in out:
+        # Tautan `wa.me` untuk pengiriman MANUAL: sistem menyiapkan pesan, manusia menekan
+        # kirim dari nomor perusahaan (pola Fase 62 — tanpa kredensial yang tidak dimiliki).
+        c["wa_link"] = wa_url(c["phone"], c["reason"]) if c.get("phone") else None
         if not c.get("phone"):
             c["blocked_reason"] = ("Nomor WhatsApp penerima belum dicatat — pengingat tidak "
                                   "bisa dikirim.")

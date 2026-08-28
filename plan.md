@@ -246,3 +246,17 @@ Sesi sebelumnya terputus di tengah penutupan temuan uji iterasi 102. Yang dilaku
 2. Ringkasan harian notifikasi (email/WA) per preferensi — belum ada jadwal harian.
 3. Pengingat WhatsApp otomatis untuk tunggakan (SP1 sesudah H+N lewat toleransi).
 4. Denda otomatis terjadwal (opsional per organisasi, `payment.late.auto_apply`).
+
+---
+
+## 3j) Fase 68 — denda terjadwal + pengingat tunggakan pra-SP (SELESAI, gate 59)
+
+| Fitur | Isi | Bukti |
+|---|---|---|
+| **Denda otomatis terjadwal** | `payment.late.auto_apply` (bawaan MATI) + rem `auto_min_days`/`auto_min_amount`; `late_fee_auto.py` memakai `late_fee_engine.apply` (tanpa mesin kedua); cron harian 09:30 WIB (`scheduler_p68`); putaran ditulis ke `late_fee_auto_runs` | gate 59 K1-K6/D1-D9; panel `LateFeeAutoPanel` di tab Penagihan |
+| **Pengingat tunggakan pra-SP** | jenis `arrears_warning` di mesin pengingat WA; lahir saat tunggakan lewat toleransi (mesin bulan = SP/arrears); rem nominal & aturan dari Pusat Konfigurasi (`reminder.arrears_*`); `wa_link` siap kirim manual | gate 59 K7-K10/D10-D13; tombol "Kirim manual" di RemindersPanel |
+| **Bug laten** | `sched_p59.register()` tidak pernah dipanggil — kini terdaftar (+ p68) | gate 59 K5-K6 |
+
+## 9) Tugas berikutnya (sesudah Fase 68)
+1. `scripts/mutasi_62.py`, `mutasi_63.py`, `mutasi_65.py` — uji mutan gate 53/54/56.
+2. Ringkasan harian notifikasi (email/WA) per preferensi — belum ada jadwal harian.

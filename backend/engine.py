@@ -754,9 +754,14 @@ def start_scheduler():
     import scheduler_p45 as sched_p45
     import scheduler_p51 as sched_p51
     import scheduler_p59 as sched_p59
+    import scheduler_p68 as sched_p68
     sched_core.register(_scheduler)
     sched_p45.register(_scheduler)
     sched_p51.register(_scheduler)
+    # Fase 68: p59 (peninjauan tunggakan) ternyata diimpor tetapi TIDAK pernah didaftarkan
+    # — bug laten yang membuat tugas hariannya tidak pernah lahir. Didaftarkan sekarang.
+    sched_p59.register(_scheduler)
+    sched_p68.register(_scheduler)
     _scheduler.start()
     logger.info("APScheduler started (dispatcher + expiry + sla + retention + no_response + "
                 "pengingat + work hub + retry lead + snapshot BI + target/anggaran Fase 45 "

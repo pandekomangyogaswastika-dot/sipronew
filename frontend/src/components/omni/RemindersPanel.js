@@ -18,7 +18,7 @@ import { useAuth } from "@/context/AuthContext";
 import { useReference } from "@/context/ReferenceContext";
 import { formatIDR } from "@/utils/formatters";
 import api from "@/services/apiClient";
-import { P51 as T } from "@/constants/testIds";
+import { P51 as T, P68 } from "@/constants/testIds";
 
 /**
  * Pengingat WhatsApp otomatis (Fase 51B).
@@ -244,6 +244,13 @@ export default function RemindersPanel() {
                     className="mt-2 flex items-start gap-1.5 rounded-lg border border-amber-200 bg-amber-50 px-2 py-1.5 text-xs text-amber-900">
                     <Ban className="mt-0.5 h-3.5 w-3.5 shrink-0" /> {c.blocked_reason}
                   </p>
+                ) : null}
+                {c.wa_link ? (
+                  <a data-testid={P68.reminderWaLink} href={c.wa_link} target="_blank"
+                    rel="noreferrer"
+                    className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                    <ExternalLink className="h-3.5 w-3.5" /> Kirim manual lewat WhatsApp
+                  </a>
                 ) : null}
               </div>
             ))}

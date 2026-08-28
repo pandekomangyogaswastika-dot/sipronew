@@ -109,6 +109,7 @@ GATES=(
   # kembali "flat": kanvas berlapis, primitif berbayang + fokus 2px, satu ukuran judul
   # halaman, dan afordansi (search bar berikon, status bertitik, kartu angka beraksen).
   verify_p67.py
+  verify_p68.py
 )
 
 fail=0

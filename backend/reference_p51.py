@@ -61,6 +61,7 @@ GROUPS_P51: dict = {
             _o("warranty_expiring", "Garansi hampir habis"),
             _o("installment_due", "Termin akan jatuh tempo"),
             _o("installment_overdue", "Termin terlambat (tunggakan)"),
+            _o("arrears_warning", "Tunggakan lewat toleransi (pra-SP)"),
         ],
     },
     "reminder_status": {

@@ -1678,3 +1678,37 @@ gate 47 (K10b2, K10b3, D14b) + mutan M14/M47/M48.
   41/41 rute termuat tanpa error, 0 regresi interaksi; seluruh temuan non-blocking-nya
   (kolom aksi sticky, empty-state pencarian notifikasi, testId SearchInput, skip-link)
   sudah ditutup.
+
+## FASE 68 — Denda Terjadwal + Pengingat Tunggakan Pra-SP (gate 59)
+- **Denda otomatis terjadwal (opsi per organisasi, bawaan MATI):**
+  - `settings_store.py` — `payment.late.auto_apply` (bool, sensitive), `payment.late.auto_min_days`
+    (otomatis menunggu ≥ N hari lewat toleransi), `payment.late.auto_min_amount` (ambang nominal).
+  - `late_fee_auto.py` (BARU) — `config/preview/run/status`. TIDAK ada mesin kedua: yang
+    menagihkan tetap `late_fee_engine.apply` (berjurnal Dr 1-1300 / Cr 4-1400, idempoten per
+    termin per bulan). Pratinjau menyebut yang DITAHAN aturan beserta sebabnya; setiap
+    putaran ditulis ke `late_fee_auto_runs` (mode auto/manual, pelaku, hasil).
+  - `scheduler_p68.py` (BARU) — cron harian 02:30 UTC (09:30 WIB), SESUDAH pengingat WA
+    (08:00) dan tugas peninjauan tunggakan (09:00). Penjadwal tidak pernah meringankan
+    denda atau membatalkan kontrak.
+  - `routers/p68_router.py` (BARU) — `GET /api/finance/late-fee-auto` (late_fee:view),
+    `POST /api/finance/late-fee-auto/run` (late_fee:create; fungsi yang sama dengan penjadwal).
+  - **Bug laten ditutup:** `engine.start_scheduler` mengimpor `scheduler_p59` tetapi tidak
+    pernah memanggil `register()` — tugas peninjauan tunggakan harian tidak pernah lahir.
+    Kini `sched_p59.register()` + `sched_p68.register()` dipanggil.
+- **Pengingat tunggakan pra-SP (nominal & aturan bisa disetel):**
+  - `wa_reminder_engine.py` — jenis baru `arrears_warning`: lahir begitu tunggakan MELEWATI
+    TOLERANSI kontrak (bulan dihitung `arrears_engine.months_in_arrears` — mesin yang sama
+    dengan SP & kandidat pembatalan), menyebut keadaan SP ("SEBELUM SP1" / mendahului tingkat
+    berikutnya), dedup per (deal, ember `arrears_every_days`). Rem dari Pusat Konfigurasi:
+    `reminder.arrears_enabled`, `reminder.arrears_min_amount` (nominal minimum),
+    `reminder.arrears_min_months`, `reminder.arrears_every_days`, `reminder.template_arrears`.
+  - Setiap kandidat membawa `wa_link` (wa.me + pesan siap kirim) untuk pengiriman MANUAL —
+    pola jujur Fase 62 (`doc_share.wa_url`); pengiriman otomatis tetap jujur `simulasi`
+    tanpa kredensial. SSOT: opsi `arrears_warning` di `reference_p51.reminder_kind`.
+- **Frontend:** `finance/LateFeeAutoPanel.js` (BARU, tab Penagihan): status aktif/nonaktif,
+  kalimat aturan dari server, pratinjau hari ini (siap vs ditahan + sebab), riwayat putaran,
+  "Jalankan sekarang" (late_fee:create), tautan ke Pusat Konfigurasi. `omni/RemindersPanel.js`:
+  tombol "Kirim manual lewat WhatsApp" per kandidat. TestIds `p68.js`.
+- **Gate:** `scripts/verify_p68.py` (gate 59, 39 pemeriksaan — termasuk uji rem nominal
+  hidup di server TANPA menyentuh buku besar, RBAC 403 untuk sales, dan setelan
+  dikembalikan bersih).

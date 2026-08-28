@@ -106,3 +106,4 @@ export * from './p57';
 // Fase 58 — toleransi keterlambatan & denda keterlambatan berjurnal: tenggang yang
 // disusun pemakai (dan tercetak pada SPR) akhirnya dipakai penagihan, layar, dan portal.
 export * from './p58';
+export * from './p68';

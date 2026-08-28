@@ -158,6 +158,27 @@ DEFAULTS: dict = {d["key"]: d for d in [
     _d("payment.late.min_charge", 50000, "money", "pembayaran", "Denda minimum yang ditagihkan",
        "Denda di bawah nilai ini tidak diterbitkan (biaya administrasinya lebih besar).",
        minimum=0),
+    # ============ denda terjadwal (Fase 68) ============
+    # Menagih otomatis adalah KEPUTUSAN BISNIS, jadi bawaannya MATI dan remnya bisa
+    # disetel: berapa hari lewat toleransi baru otomatis berjalan, dan ambang nominalnya.
+    _d("payment.late.auto_apply", False, "bool", "pembayaran",
+       "Denda ditagihkan otomatis tiap hari",
+       "Bila dinyalakan, penjadwal harian menagihkan denda termin yang lewat toleransi "
+       "(berjurnal, idempoten per termin per bulan). Keringanan tetap milik Manajer "
+       "Keuangan.",
+       impact="Pembeli menerima tagihan denda tanpa staf menekan tombol — nyalakan hanya "
+              "bila kebijakan penagihan memang otomatis.",
+       sensitive=True),
+    _d("payment.late.auto_min_days", 3, "int", "pembayaran",
+       "Otomatis menunggu keterlambatan (hari lewat toleransi)",
+       "Denda baru ditagihkan OTOMATIS bila keterlambatan melewati toleransi sebanyak "
+       "ini; di bawahnya tetap bisa ditagihkan manual.",
+       minimum=0, maximum=60),
+    _d("payment.late.auto_min_amount", 0, "money", "pembayaran",
+       "Ambang nominal denda otomatis",
+       "Denda di bawah nilai ini tidak ditagihkan otomatis (0 = hanya ikut denda "
+       "minimum biasa).",
+       minimum=0),
     _d("payment.kpr.dp_pct", 0, "pct", "pembayaran", "DP KPR default (%)",
        "Uang muka default skema KPR (contoh dokumen: 0%).", minimum=0, maximum=100, src="DOC"),
     # ============ pembatalan & refund ============
@@ -396,6 +417,32 @@ DEFAULTS: dict = {d["key"]: d for d in [
     _d("reminder.template_overdue", "payment_reminder", "string", "pengingat",
        "Template WA \u2014 tunggakan",
        "Kode template WhatsApp untuk tagihan yang sudah lewat jatuh tempo."),
+    # ============ pengingat tunggakan pra-SP (Fase 68) ============
+    # Sebelum ini pembeli baru tahu ada masalah saat SP1 datang. Pengingat pra-SP lahir
+    # begitu tunggakan MELEWATI TOLERANSI kontrak; nominal & aturannya bisa disetel.
+    _d("reminder.arrears_enabled", True, "bool", "pengingat",
+       "Pengingat tunggakan lewat toleransi (pra-SP)",
+       "Pesan WhatsApp disiapkan otomatis begitu tunggakan pembeli melewati toleransi "
+       "kontrak \u2014 sebelum Surat Peringatan terbit.",
+       impact="Dimatikan = pembeli baru tahu saat SP1 datang."),
+    _d("reminder.arrears_min_amount", 0, "money", "pengingat",
+       "Nominal tunggakan minimum yang diingatkan",
+       "Tunggakan di bawah nilai ini tidak menghasilkan pengingat pra-SP (0 = semua "
+       "tunggakan diingatkan).",
+       minimum=0),
+    _d("reminder.arrears_min_months", 1, "int", "pengingat",
+       "Bulan tunggakan minimum (lewat toleransi)",
+       "Pengingat pra-SP lahir setelah tunggakan mencapai sekian bulan menurut hitungan "
+       "SPR (akumulatif maupun berurutan).",
+       minimum=1, maximum=12),
+    _d("reminder.arrears_every_days", 7, "int", "pengingat",
+       "Ulang pengingat pra-SP setiap (hari)",
+       "Satu pengingat per rentang ini per transaksi \u2014 bukan tiap hari.",
+       minimum=1, maximum=90),
+    _d("reminder.template_arrears", "payment_reminder", "string", "pengingat",
+       "Template WA \u2014 tunggakan lewat toleransi (pra-SP)",
+       "Kode template WhatsApp untuk pengingat tunggakan yang melewati toleransi "
+       "kontrak."),
 ]}
 
 GROUP_LABELS = {

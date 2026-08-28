@@ -80,6 +80,7 @@ from routers.payment_scheme_router import router as payment_scheme_router
 from routers.late_fee_router import router as late_fee_router
 # Fase 59 — laporan keringanan denda, kandidat tunggakan, laporan utang refund
 from routers.p59_router import router as p59_router
+from routers.p68_router import router as p68_router
 from routers.p62_router import router as p62_router
 # Fase 60 — konfigurasi tampilan dokumen (kop, footer, tanda tangan, baris biaya)
 from routers.doc_layout_router import router as doc_layout_router
@@ -406,6 +407,7 @@ api.include_router(cancellation_router)
 api.include_router(payment_scheme_router)
 api.include_router(late_fee_router)
 api.include_router(p59_router)
+api.include_router(p68_router)
 # Fase 62 — surat peringatan tunggakan SP1/SP2/SP3 & pengiriman dokumen ke pihak luar.
 api.include_router(p62_router)
 api.include_router(doc_layout_router)
