@@ -13,6 +13,14 @@ Bahasa produk & komunikasi: **Indonesia**.
 - Kredensial uji: `/app/memory/test_credentials.md` (sandi demo `Sipro#2026`).
 
 ## Riwayat implementasi (terbaru di atas)
+### 28 Agu 2026 (lanjutan) — sidebar bisa di-collapse/expand
+- Tombol ciut/perlebar di kepala sidebar (`sidebar-collapse-toggle`, ikon PanelLeft):
+  mode ciut = 64px ikon-saja dengan `title` tooltip per menu, grup dipisah garis tipis;
+  mode lebar = 256px seperti semula. Pilihan tersimpan di
+  `localStorage["sipro.sidebar.collapsed"]` dan bertahan antar sesi.
+- Drawer mobile tetap selalu tampil penuh. Diverifikasi browser: collapse 64px →
+  reload tetap ciut → expand 256px; 0 error konsol.
+
 ### 28 Agu 2026 (lanjutan) — warna ikon kategori di pusat notifikasi
 - `CATEGORY_TONE` (kelas LITERAL, bukan dirakit dinamis — pelajaran regresi pill) di
   `NotificationRows.js`: tugas amber, keuangan emerald, penjualan sky, proyek oranye,

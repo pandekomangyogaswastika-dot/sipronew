@@ -9,12 +9,19 @@ import { useAuth } from "@/context/AuthContext";
 export default function AppShell() {
   const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
+  // Pilihan pemakai bertahan antar sesi; di mobile drawer selalu tampil penuh.
+  const [collapsed, setCollapsed] = useState(
+    () => localStorage.getItem("sipro.sidebar.collapsed") === "1");
+  const toggleSidebar = () => setCollapsed((c) => {
+    localStorage.setItem("sipro.sidebar.collapsed", c ? "0" : "1");
+    return !c;
+  });
 
   return (
     <div className="flex h-screen overflow-hidden app-noise bg-background">
       {/* Desktop sidebar */}
       <div className="hidden md:block">
-        <Sidebar role={user?.role} />
+        <Sidebar role={user?.role} collapsed={collapsed} onToggle={toggleSidebar} />
       </div>
 
       {/* Mobile drawer */}
