@@ -13,6 +13,17 @@ Bahasa produk & komunikasi: **Indonesia**.
 - Kredensial uji: `/app/memory/test_credentials.md` (sandi demo `Sipro#2026`).
 
 ## Riwayat implementasi (terbaru di atas)
+### 28 Agu 2026 (perbaikan) — regresi Fase 67: warna status pill hilang (flat abu)
+- Akar masalah: blok `.status-*` di `index.css` dipindah ke dalam `@layer components`,
+  padahal kelasnya dirakit DINAMIS oleh `StatusPill` (`status-${tone}`) — isi @layer
+  di-tree-shake Tailwind berdasarkan kelas literal di sumber, jadi SEMUA warna status
+  terbuang saat build dan pill tampil putih/abu seragam.
+- Perbaikan: blok `.status-pill` + seluruh `.status-*` dikeluarkan dari `@layer` (CSS polos
+  selalu terkompilasi) + komentar penjaga agar tidak dipindah kembali. ATURAN: kelas yang
+  dirakit dinamis TIDAK boleh berada di dalam `@layer`.
+- Verifikasi: iterasi 104 (frontend 100%) — /leads, AR, kas bon, subcon, tasks, agenda
+  semuanya berwarna semantik lagi; dot ::before tetap; 0 error console; gaya Fase 67 utuh.
+
 ### 28 Agu 2026 (lanjutan) — Fase 68: denda terjadwal + pengingat tunggakan pra-SP (gate 59)
 - **Denda otomatis terjadwal** (`late_fee_auto.py` + `scheduler_p68.py`, cron 09:30 WIB):
   opsi per organisasi `payment.late.auto_apply` (bawaan MATI — keputusan bisnis) + dua rem

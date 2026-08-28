@@ -207,9 +207,13 @@
     }
 }
 
-/* Semantic status pills — consistent across domains */
-@layer components {
-    .status-pill {
+/* Semantic status pills — consistent across domains.
+   SENGAJA DI LUAR @layer: nama kelas warna ini dirakit DINAMIS oleh StatusPill
+   (`status-${tone}`), sehingga tidak pernah tertulis literal di berkas sumber.
+   Isi @layer di-tree-shake Tailwind berdasarkan kelas yang terlihat di sumber —
+   di dalam @layer, seluruh warna status dibuang saat build dan semua pill menjadi
+   putih/abu (regresi Fase 67). CSS polos selalu ikut terkompilasi. */
+.status-pill {
         @apply inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold shadow-sm;
     }
     /* Titik warna di depan teks: status bisa dikenali dari BENTUK+WARNA, tidak hanya warna
@@ -313,7 +317,6 @@
     .status-half { @apply bg-sky-50 text-sky-800 border-sky-200; }
     .status-absent { @apply bg-rose-50 text-rose-700 border-rose-200; }
     .status-leave { @apply bg-violet-50 text-violet-800 border-violet-200; }
-}
 
 @layer base {
     [data-debug-wrapper="true"] {
