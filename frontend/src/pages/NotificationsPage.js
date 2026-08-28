@@ -5,7 +5,7 @@ import { Bell, CheckCheck, Eraser, Layers, Search, SlidersHorizontal } from "luc
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { LoadingCards, ErrorState } from "@/components/patterns/StateViews";
-import NotificationRows, { CATEGORY_ICON } from "@/components/notifications/NotificationRows";
+import NotificationRows, { CATEGORY_ICON, CATEGORY_TONE } from "@/components/notifications/NotificationRows";
 import NotificationPrefsDialog from "@/components/notifications/NotificationPrefsDialog";
 import { useReference } from "@/context/ReferenceContext";
 import useListQuery from "@/hooks/useListQuery";
@@ -217,9 +217,12 @@ export default function NotificationsPage() {
           return (
             <button key={kat} data-testid={`${NOTIF.categoryChip}-${kat}`}
               onClick={() => toggleCat(kat)}
-              className={cn("flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs transition-colors",
+              className={cn("flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-colors",
                 aktif ? "border-primary bg-primary/10 text-primary" : "bg-card hover:bg-secondary")}>
-              <Icon className="h-3.5 w-3.5" />
+              <span className={cn("flex h-5 w-5 items-center justify-center rounded-full",
+                CATEGORY_TONE[kat] || CATEGORY_TONE.sistem)}>
+                <Icon className="h-3 w-3" />
+              </span>
               {labelOf("notification_category", kat)}
               <span className="tabular-nums text-muted-foreground">{jml}</span>
             </button>

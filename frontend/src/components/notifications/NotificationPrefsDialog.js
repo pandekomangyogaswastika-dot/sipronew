@@ -8,7 +8,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { CATEGORY_ICON } from "@/components/notifications/NotificationRows";
+import { CATEGORY_ICON, CATEGORY_TONE } from "@/components/notifications/NotificationRows";
 import { useReference } from "@/context/ReferenceContext";
 import api from "@/services/apiClient";
 import { NOTIF } from "@/constants/testIds";
@@ -100,7 +100,10 @@ export default function NotificationPrefsDialog({ open, onOpenChange, onSaved })
               <div key={kat} data-testid={`${NOTIF.prefsRow}-${kat}`}
                 className="flex flex-col gap-2 rounded-lg border bg-card px-3 py-2 sm:flex-row sm:items-center sm:gap-3 shadow-[var(--shadow-card)]">
                 <span className="flex flex-1 items-center gap-2 text-sm">
-                  <Icon className="h-3.5 w-3.5 text-muted-foreground" />
+                  <span className={"flex h-6 w-6 items-center justify-center rounded-full "
+                    + (CATEGORY_TONE[kat] || CATEGORY_TONE.sistem)}>
+                    <Icon className="h-3.5 w-3.5" />
+                  </span>
                   {labelOf("notification_category", kat)}
                 </span>
                 <div className="flex gap-3 sm:gap-0">

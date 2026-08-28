@@ -13,6 +13,15 @@ Bahasa produk & komunikasi: **Indonesia**.
 - Kredensial uji: `/app/memory/test_credentials.md` (sandi demo `Sipro#2026`).
 
 ## Riwayat implementasi (terbaru di atas)
+### 28 Agu 2026 (lanjutan) — warna ikon kategori di pusat notifikasi
+- `CATEGORY_TONE` (kelas LITERAL, bukan dirakit dinamis — pelajaran regresi pill) di
+  `NotificationRows.js`: tugas amber, keuangan emerald, penjualan sky, proyek oranye,
+  layanan violet, sebutan pink, sistem slate. Baris yang sudah dibaca memudar (opacity),
+  bukan kehilangan warnanya.
+- Dipakai di 3 tempat: lingkaran ikon baris notifikasi, chip filter kategori
+  (NotificationsPage), dan baris dialog Preferensi. Diverifikasi visual: computed bg
+  per kategori benar, tanpa error konsol.
+
 ### 28 Agu 2026 (perbaikan) — regresi Fase 67: warna status pill hilang (flat abu)
 - Akar masalah: blok `.status-*` di `index.css` dipindah ke dalam `@layer components`,
   padahal kelasnya dirakit DINAMIS oleh `StatusPill` (`status-${tone}`) — isi @layer

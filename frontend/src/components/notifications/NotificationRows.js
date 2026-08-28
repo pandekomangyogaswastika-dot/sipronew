@@ -16,6 +16,18 @@ export const CATEGORY_ICON = {
   layanan: LifeBuoy, sebutan: AtSign, sistem: Info,
 };
 
+// Warna per kategori (kelas LITERAL — jangan dirakit dinamis, pelajaran regresi pill:
+// Tailwind hanya mengompilasi kelas yang tertulis di sumber).
+export const CATEGORY_TONE = {
+  tugas: "bg-amber-100 text-amber-700",
+  keuangan: "bg-emerald-100 text-emerald-700",
+  penjualan: "bg-sky-100 text-sky-700",
+  proyek: "bg-orange-100 text-orange-700",
+  layanan: "bg-violet-100 text-violet-700",
+  sebutan: "bg-pink-100 text-pink-700",
+  sistem: "bg-slate-200 text-slate-600",
+};
+
 /**
  * NotificationRows — daftar notifikasi RINGKAS (Fase 64).
  *
@@ -66,7 +78,8 @@ export default function NotificationRows({ rows = [], onRead, onDismiss, emptySt
               </button>
             ) : null}
             <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-full",
-              n.read ? "bg-secondary text-muted-foreground" : "bg-primary/10 text-primary")}>
+              CATEGORY_TONE[n.category] || CATEGORY_TONE.sistem,
+              n.read && "opacity-50")}>
               <Icon className="h-3.5 w-3.5" />
             </span>
 
